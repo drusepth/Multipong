@@ -5,6 +5,7 @@
 
 body {
     background: #222222;
+    overflow: hidden;
 }
 
 .paddle {
@@ -41,25 +42,28 @@ body {
     text-align: center;
 }
 
-#observation .screen {
+.screen {
     height: 146px;
-    width: 33%;
+    width: 300px;
     
-    float: left;
+    display: inline;
 
     margin: 1px;
     padding: 1px;
-    background: #333333;
+    background: #dff;
 }
 
-#observation .screen .paddle {
+.screen .paddle {
     height: 3px;
     width: 50px;
     background: #cccccc;
-    bottom: 15px;
+    
+    position: absolute;
+    top: 0px;
+    left: 0px;
 }
 
-#observation .screen .ball {
+.screen .ball {
     height: 3px;
     width: 3px;
 }
