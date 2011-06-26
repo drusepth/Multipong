@@ -1,0 +1,31 @@
+* { 
+    margin: 0px;
+    padding: 0px;
+}
+
+body {
+    background: #222222;
+}
+
+.paddle {
+    background: #ffffff;
+    border: 1px solid #666666;
+    height: 10px;
+    width: 200px;
+    
+    position: absolute;
+    bottom: 50px;
+    left: 100px;
+}
+
+.ball {
+    height: 30px;
+    width: 30px;
+    background: #ffffff;
+    border: 1px solid #666666;
+    border-radius: 10px;
+    
+    position: absolute;
+    bottom: 100px;
+    left: 200px;
+}
