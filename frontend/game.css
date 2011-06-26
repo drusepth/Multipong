@@ -46,11 +46,11 @@ body {
     height: 146px;
     width: 300px;
     
-    display: inline;
+    float: left;
 
     margin: 1px;
     padding: 1px;
-    background: #dff;
+    background: #555555;
 }
 
 .screen .paddle {
@@ -58,14 +58,18 @@ body {
     width: 50px;
     background: #cccccc;
     
-    position: absolute;
-    top: 0px;
-    left: 0px;
+    position: relative;
+    top: 130px;
+    left: 20px;
 }
 
 .screen .ball {
     height: 3px;
     width: 3px;
+    
+    position: relative;
+    top: 100px;
+    left: 50px;
 }
 
 
