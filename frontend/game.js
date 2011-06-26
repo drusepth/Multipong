@@ -1,10 +1,15 @@
 // core game engine declarations
 
+// might have to use pixels for x, and 1.0 for y
+
 var has_ball = false;
 var ball = {loc: {x:0.5, y:0}, vel:{x:0, y:0.04}};
 var ball_radius = 20; // different sized screens?
-var paddle = {loc: {x:0, y:0.1}, vel:{x:0, y:0}}; // ignore y stuff
-var paddle_speed = 0.02;
+var paddle_speed = 0.03;
+var paddle_height = 0.1;
+var paddle = {loc: {x:0, y:paddle_height},
+	      vel:{x:0, y:0},
+	      width:0.25}; 
 var w = 0;
 var h = 0;
 
@@ -26,16 +31,32 @@ function start_game() {
     var game = {};
     
     game.play = function(){
-	// draw the ball
+	// collision detection
+	if(ball.loc.y > paddle_height &&
+	   ball.loc.y+ball.vel.y < paddle_height) {
+	    if(ball.loc.x < paddle.loc.x + paddle.width/2 &&
+	       ball.loc.x > paddle.loc.x - paddle.width/2) {
+		// reverse the velocity
+		ball.vel.y = -ball.vel.y
+		// change the direction depending on the paddle side
+		ball.vel.x += ball.loc.x - paddle.loc.x
+	    }
+	}
+
+	// move the paddle
+	paddle.loc.x += paddle.vel.x;
+
+	// do stuff with the ball
 	if(has_ball) {
 	    // move the ball
 	    ball.loc.x += ball.vel.x;
 	    ball.loc.y += ball.vel.y;
+	    ball.vel.y -= 0.001;
 	    // draw the ball
 	    move_to_loc($("#main_ball"), ball.loc);
 	}
+
 	// draw the paddle, draw it all the time
-	paddle.loc.x += paddle.vel.x;
 	move_to_loc($("#main_paddle"), paddle.loc);
 	
 	// do it over and over again
