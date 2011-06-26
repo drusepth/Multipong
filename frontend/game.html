@@ -2,6 +2,7 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="game.css" />
+    <link rel="stylesheet" type="text/css" href="observation.css" />
     <script src="jquery-1.6.1.min.js"></script>
     <script src="game.js"></script>
 </head>
@@ -9,13 +10,16 @@
 
     <div id="observation">
         <div class="screen">
+            <div class="status">Player 2</div>
             <div class="ball"></div>
             <div class="paddle"></div>
         </div>
         <div class="screen">
+            <div class="status">Player 3</div>
             <div class="paddle"></div>
         </div>
         <div class="screen">
+            <div class="status">Player 4</div>
             <div class="paddle"></div>
         </div>
     </div>
@@ -23,7 +27,8 @@
     <div class="ball" id="main_ball"></div>
     <div class="paddle" id="main_paddle"></div>
     
-    <div id="scoreboard">5035</div>
+    <div class="status">Player 1</div>
+    <div class="scoreboard">5035</div>
     <div id="watermark">Multipong</div>
 
 </body>

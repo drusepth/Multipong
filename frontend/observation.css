@@ -1,0 +1,46 @@
+#observation {
+    height: 150px;
+    width: 90%;
+    
+    position: relative;
+    top: 20px;
+    margin: 0 auto;
+}
+
+.screen {
+    height: 146px;
+    width: 300px;
+    
+    float: left;
+
+    margin: 1px;
+    padding: 1px;
+    background: #555555;
+}
+
+.screen .paddle {
+    height: 3px;
+    width: 50px;
+    background: #cccccc;
+    
+    position: relative;
+    top: 100px;
+    left: 20px;
+}
+
+.screen .ball {
+    height: 3px;
+    width: 3px;
+    
+    position: relative;
+    top: 70px;
+    left: 50px;
+}
+
+.screen .status {
+    position: relative;
+    top: 0px;
+    left: 0px;
+    font-size: 10px;
+    text-align: center;
+}
