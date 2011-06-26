@@ -1,14 +1,32 @@
-<!--
-To change this template, choose Tools | Templates
-and open the template in the editor.
--->
 <!DOCTYPE html>
 <html>
   <head>
     <title></title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io.connect('http://localhost:8080/');
+      var player = null;
+      socket.on('init', function (data) { 
+        player = data;
+        document.getElementById('score').innerHTML = 'Score: '+player.score;        
+      });
+      socket.on('score', function (data) {
+        console.log(data);
+        document.getElementById('score').innerHTML = 'Score: '+data;
+      });
+      
+      function decrement_score() {
+        socket.emit('score', { user: 1 });        
+      }
+      
+    </script>    
   </head>
   <body>
-    <div>TODO write content</div>
+    <div id="score">Score: </div>
+    
+
+    <input type="button" value="lose point" onclick="decrement_score();">
+    
   </body>
 </html>
