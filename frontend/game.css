@@ -1,6 +1,7 @@
 * { 
     margin: 0px;
     padding: 0px;
+    font-family: Geneva;
 }
 
 body {
@@ -72,8 +73,23 @@ body {
     left: 50px;
 }
 
+#scoreboard {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    color: #ffffff;
+    font-size: 45px;
+}
 
-
+#watermark {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    margin: 0 auto;
+    z-index: -10;
+    font-size: 200px;
+    color: #333333;
+}
 
 
 
