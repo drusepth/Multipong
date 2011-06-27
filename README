@@ -14,9 +14,10 @@ JSON messages:
 all don't strictly need the player field, can infer from server side
 
 Leaves a screen
-{type:"screen", player:#id, direction:"left" or "right"}
+{type:"screen", player:#id, direction:"left" or "right" or "topo", 
+ location:{x:#, y:#}, velocity:{x:#,y:#}, geometry:{w:#,h:#}}
 Bounces
-{type:"bounce", player:#id, velocity:{x:#,y:#}, screen:{w:#,h:#}}
+{type:"bounce", player:#id, velocity:{x:#,y:#}}
 End Game
 {type:"drop", player:#id}
 Score change

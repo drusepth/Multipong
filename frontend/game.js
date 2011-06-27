@@ -17,6 +17,9 @@ var h = 0;
 var fps = 30;
 var player = { name: "Player 1", points: 0 };
 
+var date;
+var time_start = 0;
+
 // util functions --------------------------------------------------
 function game_to_css_coords(location) {
     return {x: location.x*w, y:(1-location.y)*h};
@@ -55,6 +58,7 @@ function pass_velocity(velocity, geometry) {
 // push a message to the server
 function send(type, payload) {
     // noop as of now
+    console.log(type+payload);
 }
 
 // ------------------------------------------------------------
@@ -74,11 +78,17 @@ function start_game() {
             $('#gamestate').text('Paused').toggle(50);
         }
     });
+    $(document).keyup(function(event){
+        paddle.vel.x = 0;
+    });
 
     paddle.width = css_to_game_coords({x:$("#main_paddle").width(),y:0}).x;
 
     var game = {};
     game.play = function(){
+        // get the current time
+        date = new Date();
+        time_start = date.getTime();
         // collision detection
         // if ball will fall past the paddle...
         if(ball.loc.y > paddle_height &&
@@ -98,7 +108,14 @@ function start_game() {
                 polar.t += (ball.loc.x - paddle.loc.x)/(4*paddle.width);
                 // change back
                 ball.vel = polar_to_cartesian(polar);
+                // add the paddle's velocity to the ball
+                ball.vel.x += paddle.vel.x*0.5;
+                // size down the paddle after a hit
+                paddle.width *= 0.98;
+                $("#main_paddle").width($("#main_paddle").width()*0.98);
+                // comm
                 send("bounce", {velocity: ball.vel});
+                send("score", {score:player.points});
             }
         }
 
@@ -125,12 +142,10 @@ function start_game() {
                 $("#main_ball").hide();
                 // send appropriate messages
                 if( ball.loc.x < 0 ) {
-                    send("screen", {direction:"left", geometry:{w:w, h:h}});
-                } else {
-                    send("screen", {direction:"right", geometry:{w:w, h:h}});
+                    send("screen", {direction:"left", geometry:{w:w, h:h}, location:ball.loc, velocity:ball.vel});
+                } else { // must be loc.x > 1.0
+                    send("screen", {direction:"right", geometry:{w:w, h:h}, location:ball.loc, velocity:ball.vel});
                 }
-                send("score", {score:player.points});
-                // alert("MOVED OUT OF AREA");
             }
             // check if the ball is below the water line
             if(ball.loc.y < 0) {
@@ -139,7 +154,6 @@ function start_game() {
                 // send appropriate messages
                 send("drop",{});
                 send("score",{score:player.points});
-                // alert("YOU LOSE HAHAHA");
             }
             // draw the ball
             move_to_loc($("#main_ball"), ball.loc);
@@ -149,10 +163,14 @@ function start_game() {
         move_to_loc($("#main_paddle"), paddle.loc);
         
         // do it over and over again
-        setTimeout(game.play, 1000/fps);
+        date = new Date();
+        // while trying to do 30fps
+        var d_time = 1000/fps - (date.getTime()-time_start);
+        setTimeout(game.play, d_time);
     }
 
-    setTimeout(game.play,1000/fps);
+    // start it off
+    game.play();
 }
 
 function bounce() {
@@ -167,8 +185,4 @@ $(document).ready(function(){
     h = $(window).height();
 
     start_game();
-
-    $(document).keyup(function(event){
-        paddle.vel.x = 0;
-    });
 });
