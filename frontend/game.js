@@ -68,7 +68,7 @@ function send(type, payload) {
 // something for the callback
 function callback(obj) {
     if(obj.type == "screen"){
-        // change screen
+        // send a ball to this screen
         if(player.id == obj.player) {
             ball.vel = pass_velocity(obj.velocity, obj.geometry);
             ball.loc = obj.location;
@@ -81,19 +81,27 @@ function callback(obj) {
         }
     } else if(obj.type == "bounce") {
         if(player.id != obj.player) {
-            // change arrow location
+            // change arrow location, which is based on the ball.loc
+            ball.loc.y = 0.1;
+            ball.vel = obj.velocity;
         }
     } else if(obj.type == "drop") {
         if(player.id != obj.player) {
             // display drop message
+            $('#gamestate').text('Someone Else Dropped!').toggle(50).delay(3000).toggle(50);
         }
     } else if(obj.type == "score") {
+        // someone else scores, we don't care (for now)
         // stub
     }
 }
 
 // ------------------------------------------------------------
 function start_game() {
+    // vital stuff
+    w = $(window).width();
+    h = $(window).height();
+
     // if we start off,
     if(init_player == player.id) {
         ball.loc.x = Math.random()*0.4+0.3;
@@ -126,6 +134,7 @@ function start_game() {
         // else if(event.which == 32)
     });
 
+    // for kicks and giggles
     paddle.width = css_to_game_coords({x:$("#main_paddle").width(),y:0}).x;
 
     var game = {};
@@ -136,7 +145,8 @@ function start_game() {
         // collision detection
         // if ball will fall past the paddle...
         if(ball.loc.y > paddle_height &&
-           ball.loc.y+ball.vel.y < paddle_height) {
+           ball.loc.y+ball.vel.y < paddle_height &&
+           has_ball) {
             // check if it falls into the paddle
             if(ball.loc.x < paddle.loc.x + paddle.width/2 &&
                ball.loc.x > paddle.loc.x - paddle.width/2) {
@@ -201,11 +211,14 @@ function start_game() {
                 // send appropriate messages
                 send("drop",{});
                 send("score",{score:player.points});
-                // alert("YOU LOSE HAHAHA");
                 $('#gamestate').text('Dropped!').toggle(50).delay(3000).toggle(50);
             }
             // draw the ball
             move_to_loc($("#main_ball"), ball.loc);
+        } else {
+            // move the arrow around
+            ball.loc.y += ball.vel.y;
+            move_to_loc($("#arrow"), game_to_css_coords(ball.loc).y);
         }
 
         // draw the paddle, draw it all the time
@@ -230,9 +243,6 @@ function bounce() {
 
 $(document).ready(function(){
     $('#main_player').text(player.name);
-
-    w = $(window).width();
-    h = $(window).height();
 
     start_game();
 });
