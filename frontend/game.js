@@ -244,5 +244,5 @@ function bounce() {
 $(document).ready(function(){
     $('#main_player').text(player.name);
 
-    start_game();
+ //   start_game();
 });

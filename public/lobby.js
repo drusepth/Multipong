@@ -37,6 +37,9 @@ Game.prototype.connect = function(nick) {
     console.log('Receive init ', players);
     Scoreboard.players = players;
     self.player = Scoreboard.players[self.player.id];
+    $('#scoreboard').hide();
+    $('#main').show();    
+    start_game();
 //    Scoreboard.render();
   });
   // when the score changes for a user
@@ -49,14 +52,16 @@ Game.prototype.connect = function(nick) {
   this.socket.on('screen', function(msg) {
     if(msg.player == self.player.id) {
       // trigger screen
+      callback(msg);
     }
   });
 
   this.socket.on('bounce', function(msg) {
     // trigger bounce
+    callback(msg);
   });
   this.socket.on('drop', function(msg) {
-
+    callback(msg);
   });
 };
 
