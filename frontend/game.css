@@ -59,6 +59,18 @@ body {
     opacity: 0.7;
 }
 
+#gamestate {
+    position: absolute;
+    top: 200px;
+    left: 0px;
+    z-index: 10px;
+    font-size: 100px;
+    width: 100%;
+    text-align: center;
+    color: #ffffff;
+    display: none;
+}
+
 
 
 
