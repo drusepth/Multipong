@@ -1,3 +1,23 @@
-README
+--------------------------------------------------
+- README
+--------------------------------------------------
 
-init
+Multiplayer pong!
+
+We assume that users will not cheat
+
+Frontend
+--------------------------------------------------
+
+JSON messages:
+
+all don't strictly need the player field, can infer from server side
+
+Leaves a screen
+{type:"screen", player:#id, direction:"left" or "right"}
+Bounces
+{type:"bounce", player:#id, velocity:{x:#,y:#}, screen:{w:#,h:#}}
+End Game
+{type:"drop", player:#id}
+Score change
+{type:"score", player:#id, score:#}

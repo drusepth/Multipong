@@ -17,10 +17,10 @@ var h = 0;
 var fps = 30;
 var player = { name: "Player 1", points: 0 };
 
+// util functions --------------------------------------------------
 function game_to_css_coords(location) {
     return {x: location.x*w, y:(1-location.y)*h};
 }
-
 function css_to_game_coords(location) {
     return {x: location.x/w, y:1-location.y*h};
 }
@@ -30,13 +30,12 @@ function cartesian_to_polar(location) {
     // theta is respect to up
     return {r: Math.sqrt(Math.pow(location.x,2)+Math.pow(location.y,2)), t: Math.atan2(location.x, location.y)};
 }
-
 function polar_to_cartesian(location) {
-    // x and y, duh
     return {x:location.r*Math.sin(location.t),
             y:location.r*Math.cos(location.t)};
 }
 
+// center object on location
 function move_to_loc(element, location) {
     var tmp_loc = game_to_css_coords(location);
     var tmp_w = element.width(); // SO DUMB
@@ -45,8 +44,36 @@ function move_to_loc(element, location) {
     element.css("top" ,tmp_loc.y-tmp_h/2);
 }
 
+// calculate the velocity when changing screen geometries
+function pass_velocity(velocity, geometry) {
+    // concerned with vel.x
+    var d_aspect = (w/h)/(geometry.w/geometry.h);
+    velocity.x *= d_aspect;
+    return velocity;
+}
+
+// push a message to the server
+function send(type, payload) {
+    // noop as of now
+}
+
+// ------------------------------------------------------------
 function start_game() {
     has_ball = true;
+
+    // handle events
+    $(document).keydown(function(event){
+        if(event.which == 39) {
+            paddle.vel.x = paddle_speed;
+        }
+        if(event.which == 37) {
+            paddle.vel.x = -paddle_speed;
+        }
+        if(event.which == 80) { // p
+            // Pause the game (bypass our screen)
+            $('#gamestate').text('Paused').toggle(50);
+        }
+    });
 
     paddle.width = css_to_game_coords({x:$("#main_paddle").width(),y:0}).x;
 
@@ -56,22 +83,29 @@ function start_game() {
         // if ball will fall past the paddle...
         if(ball.loc.y > paddle_height &&
            ball.loc.y+ball.vel.y < paddle_height) {
-            var polar = cartesian_to_polar(ball.vel);
+            // check if it falls into the paddle
             if(ball.loc.x < paddle.loc.x + paddle.width/2 &&
                ball.loc.x > paddle.loc.x - paddle.width/2) {
-                // reverse the velocity
+                // it's a bounce!
+                // convert to polar coordinates
+                var polar = cartesian_to_polar(ball.vel);
+                // slow it down
                 polar.r *= ball_rebound;
+                // turn it around
                 polar.t += Math.PI;
                 polar.t *= -1;
+                // change the velocity depending on where it lands
                 polar.t += (ball.loc.x - paddle.loc.x)/(4*paddle.width);
+                // change back
                 ball.vel = polar_to_cartesian(polar);
+                send("bounce", {velocity: ball.vel});
             }
         }
 
         // move the paddle
         if(paddle.vel.x != 0) {
             paddle.loc.x += paddle.vel.x;
-            //// FIRE AN EVENT HERE
+            //// FIRE AN EVENT HERE?
         }
         // don't allow paddle to move too far
         if(paddle.loc.x - paddle.width/2 < 0)
@@ -89,15 +123,23 @@ function start_game() {
             if(ball.loc.x < 0 || ball.loc.x > 1) {
                 has_ball = false;
                 $("#main_ball").hide();
-                //// FIRE AN EVENT HERE
-                alert("MOVED OUT OF AREA");
+                // send appropriate messages
+                if( ball.loc.x < 0 ) {
+                    send("screen", {direction:"left", geometry:{w:w, h:h}});
+                } else {
+                    send("screen", {direction:"right", geometry:{w:w, h:h}});
+                }
+                send("score", {score:player.points});
+                // alert("MOVED OUT OF AREA");
             }
             // check if the ball is below the water line
             if(ball.loc.y < 0) {
-                //// FIRE AN EVENT HERE
                 has_ball = false;
                 $("#main_ball").hide();
-                alert("YOU LOSE HAHAHA");
+                // send appropriate messages
+                send("drop",{});
+                send("score",{score:player.points});
+                // alert("YOU LOSE HAHAHA");
             }
             // draw the ball
             move_to_loc($("#main_ball"), ball.loc);
@@ -123,21 +165,8 @@ $(document).ready(function(){
 
     w = $(window).width();
     h = $(window).height();
-    // ball_radius = ;
-    start_game();
 
-    $(document).keydown(function(event){
-        if(event.which == 39) {
-            paddle.vel.x = paddle_speed;
-        }
-        if(event.which == 37) {
-            paddle.vel.x = -paddle_speed;
-        }
-        if(event.which == 80) { // p
-            // Pause the game (bypass our screen)
-            $('#gamestate').text('Paused').toggle(50);
-        }
-    });
+    start_game();
 
     $(document).keyup(function(event){
         paddle.vel.x = 0;
