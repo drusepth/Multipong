@@ -5,28 +5,69 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <script src="/socket.io/socket.io.js"></script>
     <script>
-      var socket = io.connect('http://localhost:8080/');
-      var player = null;
-      socket.on('init', function (data) { 
-        player = data;
-        document.getElementById('score').innerHTML = 'Score: '+player.score;        
-      });
-      socket.on('score', function (data) {
-        console.log(data);
-        document.getElementById('score').innerHTML = 'Score: '+data;
-      });
       
-      function decrement_score() {
-        socket.emit('score', { user: 1 });        
-      }
+      var Game = function() {
+        this.socket = null;
+        this.player = null;
+      };      
+      Game.prototype.connect = function() {
+        var self = this;
+        this.socket = io.connect('http://localhost:8080/');
+        
+        this.socket.on('connect', function() {
+          console.log('Connected, emit nick '+document.getElementById('nick').value);
+          self.socket.emit('nick', document.getElementById('nick').value);
+        });
+        this.socket.on('init', function (players, id) { 
+          console.log('Receive init ', players, id);
+          Scoreboard.players = players;
+          self.player = Scoreboard.players[id];
+          Scoreboard.render();
+        });
+        this.socket.on('score', function (msg) {
+          console.log('Score ', msg);
+          Scoreboard.players[msg.user].score = msg.score; 
+          Scoreboard.render();
+        });        
+        this.socket.on('new_player', function(player) {
+          Scoreboard.players[player.id] = player;
+          Scoreboard.render();
+        });       
+      };
+
+      Game.prototype.decrement_score = function () {
+        this.socket.emit('score', { user: this.player.id });        
+      };
+      var game = new Game();
+      
+      var Scoreboard = function() {};
+      Scoreboard.players = [];
+      
+      Scoreboard.render = function() {
+        var str = '';
+        for(var i = 0; i < Scoreboard.players.length; i++) {
+          var player = Scoreboard.players[i];
+          str += '<div>'+player.nick+'('+player.id+') Score: '+player.score+'</div>';                  
+        }
+        document.getElementById('scores').innerHTML = str;
+      };
       
     </script>    
   </head>
   <body>
-    <div id="score">Score: </div>
+    <h1>Join game #1</h1>
+    <ul>
+     <li>Nickname: </li>
+     <li><input id="nick" type="text" value="tester"></li>
+     <li><input type="button" value="Join game" onclick="game.connect();"></li>
+    </ul>
+    <hr>
+    <h1>In-game</h1>
+    <h2>Scoreboard</h2>
+    <div id="scores">Score: </div>
     
 
-    <input type="button" value="lose point" onclick="decrement_score();">
+    <input type="button" value="lose point" onclick="game.decrement_score();">
     
   </body>
 </html>
