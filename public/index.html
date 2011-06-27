@@ -4,6 +4,7 @@
     <title></title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <script src="/socket.io/socket.io.js"></script>
+    <script src="lobby.js"></script>
     <script src="jquery-1.6.1.min.js"></script>
     <script src="jquery-ui-1.8.13.custom.min.js"></script>
     <script src="pages.js"></script>
@@ -25,7 +26,7 @@
 
 <div id="games_list" class="centered_popup">
     <h2>Open Games</h2>
-    <ul>
+    <ul id="gamelist">
         <li class="game" id="game_1"><span class="faded">4 people in lobby</span><a href="#">Player 1's game</a></li>
         <li class="game" id="game_2"><span class="faded">2 people in lobby</span><a href="#">John Doe's game</a></li>
     </ul>
@@ -36,7 +37,7 @@
 
 <div id="lobby" class="centered_popup">
     <h2>Player 1's game</h2>
-    <ul class="players">
+    <ul id="players" class="players">
         <li class="highlight">4 players:</li>
         <li>Alice</li>
         <li>Bob</li>

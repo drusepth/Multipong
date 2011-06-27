@@ -62,7 +62,10 @@ io.sockets.on('connection', function (socket) {
     socket.broadcast.to('/game/'+msg.game).emit('new_player', players[msg.id]);  
     // add the player to the game
     games[msg.game].add(players[msg.id]);
-    socket.emit('new_player', players[msg.id]); 
+    // sync players
+    for(var i = 0; i < games[msg.game].players.length; i++) {
+      socket.emit('new_player', games[msg.game].players[i]);       
+    }
   });
   
   // when a game is configured 

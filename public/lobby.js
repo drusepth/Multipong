@@ -25,10 +25,8 @@ Game.prototype.connect = function(nick) {
   });
   // when a new player joins the current game
   this.socket.on('new_player', function(player) {
-        Scoreboard.players[player.id] = player;
-        Scoreboard.render();
-//    WaitView.players[player.id] = player;
-//    WaitView.render();
+    WaitView.players[player.id] = player;
+    WaitView.render();
   });       
   // when the game starts        
   this.socket.on('game_start', function (players, id) { 
@@ -67,6 +65,8 @@ Game.prototype.create = function(title) {
 Game.prototype.join = function(game_id) {
   this.game_id = game_id;
   this.socket.emit('join', { game: this.game_id, id: this.player.id });
+  $('#games_list').hide();
+  $('#lobby').show();  
 };
 
 // Start the existing game
@@ -77,7 +77,8 @@ Game.prototype.start = function() {
 Game.prototype.decrement_score = function () {
   this.socket.emit('score', { game: this.game_id, id: this.player.id });        
 };
-var game = new Game();
+
+game = new Game();
 
 var Scoreboard = function() {};
 Scoreboard.players = [];
@@ -104,7 +105,7 @@ GameList.render = function() {
     var game = GameList.games[i];
     str += '<div><a href="javascript:game.join('+game.id+');"> '+game.title+'('+game.id+')</a></div>';     
   }
-  document.getElementById('games_list').innerHTML = str;        
+  document.getElementById('gamelist').innerHTML = str;        
 };
 
 var WaitView = function() {};
@@ -114,7 +115,9 @@ WaitView.render = function() {
   var str = '';
   for(var i = 0; i < WaitView.players.length; i++) {
     var player = WaitView.players[i];
-    str += '<div>'+player.nick+'('+player.id+')</div>';                  
+    if(player && player.nick) {
+      str += '<div>'+player.nick+'('+player.id+')</div>';                  
+    }
   }
   document.getElementById('players').innerHTML = str;                
 };
