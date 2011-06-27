@@ -175,7 +175,7 @@ function start_game() {
 
 function bounce() {
     var points_per_bounce = 50;
-    $('#main_score').text(player.points += points_per_bounce);
+    $('#main_score').text(player.points += points_per_bounce).effect("shake", {times: 1}, 75);
 }
 
 $(document).ready(function(){
