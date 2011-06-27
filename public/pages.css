@@ -102,3 +102,11 @@ ul li:hover {
 #lobby { 
     display: none;
 }
+
+#scoreboard {
+    display: none;
+}
+
+#main {
+    display: none;
+}

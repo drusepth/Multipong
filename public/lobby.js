@@ -28,12 +28,16 @@ Game.prototype.connect = function(nick) {
     WaitView.players[player.id] = player;
     WaitView.render();
   });       
+  // when a game is created
+  this.socket.on('created', function(game_id) {
+    this.game_id = game_id;  
+  });
   // when the game starts        
-  this.socket.on('game_start', function (players, id) { 
-    console.log('Receive init ', players, id);
+  this.socket.on('game_start', function (players) { 
+    console.log('Receive init ', players);
     Scoreboard.players = players;
-    self.player = Scoreboard.players[id];
-    Scoreboard.render();
+    self.player = Scoreboard.players[self.player.id];
+//    Scoreboard.render();
   });
   // when the score changes for a user
   this.socket.on('score', function (player) {
@@ -57,7 +61,7 @@ Game.prototype.connect = function(nick) {
 };
 
 // Create a game for other people to join
-Game.prototype.create = function(title) {
+Game.prototype.create = function(title, game_id) {
   this.socket.emit('create', { title: title});
 };
 
@@ -89,7 +93,7 @@ Scoreboard.render = function() {
         var player = Scoreboard.players[i];
         str += '<div>'+player.nick+'('+player.id+') Score: '+player.score+'</div>';                  
     }
-    document.getElementById('scores').innerHTML = str;
+    document.getElementById('scoreboard').innerHTML = str;
 };
 
 var GameList = function () { };

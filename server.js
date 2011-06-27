@@ -18,6 +18,9 @@ router.file('/lobby.js', './public/lobby.js');
 router.file('/pages.js', './public/pages.js');
 router.file('/pages.css', './public/pages.css');
 router.file('/jquery-ui-1.8.13.custom.min.js', './frontend/jquery-ui-1.8.13.custom.min.js');
+router.file('/game.js', './frontend/game.js');
+router.file('/game.css', './frontend/game.css');
+router.file('/observation.css', './frontend/observation.css');
 
 var server = http.createServer(function(req, res) {router.route(req, res);} );
 server.listen(8080, 'localhost');
@@ -49,10 +52,12 @@ io.sockets.on('connection', function (socket) {
   socket.on('create', function(msg) {
     console.log('create new game', msg, games);
     games.push(new Game(msg.title, games.length));
-    socket.join('/game/'+games.length);
+    var game_id = games.length;
+    socket.join('/game/'+game_id);
     console.log('broadcast games', games);
     socket.broadcast.emit('game_list', games);
-    socket.emit('game_list', games);     
+    socket.emit('game_list', games);
+    socket.emit('created', game_id);
   });
   
   // when a player joins a game
@@ -75,8 +80,9 @@ io.sockets.on('connection', function (socket) {
   
   // when the game is started
   socket.on('start', function(msg) {
-    socket.broadcast.to('/game/'+msg.game).emit('game_start');
-    socket.emit('game_start'); 
+    console.log('Game started', msg);
+    socket.broadcast.to('/game/'+msg.game).emit('game_start', games[msg.game].players);
+    socket.emit('game_start', games[msg.game].players); 
   });
   
   // when the ball leaves the screen

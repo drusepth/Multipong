@@ -15,7 +15,8 @@ $(document).ready(function () {
     });
     
     $('#lobby').find('#start_game').click(function () {
-        $('lobby').hide();
+        $('#lobby').hide();
+        $('#scoreboard').show();
         game.start();
     });
 });

@@ -9,6 +9,15 @@
     <script src="jquery-ui-1.8.13.custom.min.js"></script>
     <script src="pages.js"></script>
     <link rel="stylesheet" type="text/css" href="pages.css" />
+    <script src="game.js"></script>
+    <link rel="stylesheet" type="text/css" href="game.css" />
+    <link rel="stylesheet" type="text/css" href="observation.css" />
+    <script type="text/javascript">
+      $(document).ready(function () {
+          $('#nickname_form').hide();
+          $('#main').show();
+      });
+    </script>
 </head>
 <body>
 
@@ -47,6 +56,37 @@
     <input type="button" value="Start Game!" style="margin-top: 50px;" id="start_game" />
     <p>Any player can start this game.</p>
 </div>
+  
+<div id="scoreboard" class="centered_popup">
+</div>
 
+<div id="main">
+    
+      <div id="observation">
+        <div class="screen">
+            <div class="status">Player 2</div>
+            <div class="ball"></div>
+            <div class="paddle"></div>
+        </div>
+        <div class="screen">
+            <div class="status">Player 3</div>
+            <div class="paddle"></div>
+        </div>
+        <div class="screen">
+            <div class="status">Player 4</div>
+            <div class="paddle"></div>
+        </div>
+    </div>
+
+    <div class="ball" id="main_ball"></div>
+    <div class="paddle" id="main_paddle"></div>
+    
+    <div class="status" id="main_player">Loading...</div>
+    <div class="scoreboard" id="main_score">0</div>
+    <div id="watermark">Multipong</div>
+
+    <div id="gamestate"></div>  
+</div>  
+  
 </body>
 </html>
