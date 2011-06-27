@@ -13,6 +13,11 @@ router.set('/', function(req, res, params, next) {
   });
 });
 router.file('/favicon.ico', './public/favicon.ico');
+router.file('/jquery-1.6.1.min.js', './frontend/jquery-1.6.1.min.js');
+router.file('/lobby.js', './public/lobby.js');
+router.file('/pages.js', './public/pages.js');
+router.file('/pages.css', './public/pages.css');
+router.file('/jquery-ui-1.8.13.custom.min.js', './frontend/jquery-ui-1.8.13.custom.min.js');
 
 var server = http.createServer(function(req, res) {router.route(req, res);} );
 server.listen(8080, 'localhost');
