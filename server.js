@@ -17,6 +17,7 @@ router.file('/favicon.ico', './public/favicon.ico');
 var server = http.createServer(function(req, res) {router.route(req, res);} );
 server.listen(8080, 'localhost');
 var io = sio.listen(server);
+io.set('log level', 0);
 
 console.log('Server listening');
 
@@ -27,16 +28,23 @@ games[0] = new Game();
 io.sockets.on('connection', function (socket) {
   console.log('Connection');
   
-  // send the player state
-  socket.emit('init', games[0].player(1));
+  socket.on('nick', function(nickname) {
+    console.log('Receive nick ', nickname);
+    var player = games[0].player();
+    player.nick = nickname;
+    // send the player state
+    console.log('send state', games[0].players, player.id);
+    socket.emit('init', games[0].players, player.id);    
+    socket.broadcast.emit('new_player', player);
+  });
   
   // respond to score change
   socket.on('score', function(msg) {
-    console.log('Emitting score', msg);
     var player = games[0].player(msg.user);
     player.score--;
-    socket.broadcast.emit('score', player.score);
-    socket.emit('score', player.score);
+    console.log('Emitting score', msg, player);
+    socket.broadcast.emit('score', { user: player.id, score: player.score });
+    socket.emit('score', { user: player.id, score: player.score }); 
   });
   
   socket.on('disconnect', function() {
