@@ -54,17 +54,19 @@ Game.prototype.connect = function(nick) {
   });        
 
   this.socket.on('screen', function(msg) {
-    if(msg.player == self.player.id) {
-      // trigger screen
-      callback(msg);
-    }
+    // trigger screen
+    msg.type = 'screen';
+    callback(msg);
   });
 
   this.socket.on('bounce', function(msg) {
     // trigger bounce
+    msg.type = 'bounce';
     callback(msg);
   });
   this.socket.on('drop', function(msg) {
+    // trigger drop
+    msg.type = 'drop';
     callback(msg);
   });
 };

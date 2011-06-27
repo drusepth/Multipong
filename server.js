@@ -89,21 +89,24 @@ io.sockets.on('connection', function (socket) {
   socket.on('screen', function(msg) {
     // tranlate player to the correct player
     if(msg.direction == 'left') {
-      msg.player = games[msg.game].leftOf(msg.player);   
+      msg.id = games[msg.game].leftOf(msg.id);   
     } else {
-      msg.player = games[msg.game].rightOf(msg.player);   
+      msg.id = games[msg.game].rightOf(msg.id);   
     }    
-    socket.broadcast.to('/game/'+msg.game).emit('screen', msg);
+    console.log('Emitting screen', msg);
+    socket.broadcast.emit('screen', msg);
   });
   
   // when the ball bounces
   socket.on('bounce', function(msg) {
-    socket.broadcast.to('/game/'+msg.game).emit('bounce', msg);
+    console.log('Emitting bounce', msg);
+    socket.broadcast.emit('bounce', msg);
   });
   
   // when the ball drops
   socket.on('drop', function(msg) {
-    socket.broadcast.to('/game/'+msg.game).emit('drop', msg);
+    console.log('Emitting drop', msg);
+    socket.broadcast.emit('drop', msg);
   });
   
   // respond to score change
