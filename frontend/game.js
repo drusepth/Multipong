@@ -7,9 +7,10 @@ var ball = {loc: {x:0.5, y:0}, vel:{x:0, y:0.04}};
 var ball_radius = 20; // different sized screens?
 var paddle_speed = 0.03;
 var paddle_height = 0.1;
-var paddle = {loc: {x:0, y:paddle_height},
+var paddle = {loc: {x:0.5, y:paddle_height},
 	      vel:{x:0, y:0},
-	      width:0.25}; 
+	      width:0};
+var ball_rebound = 0.9;
 var w = 0;
 var h = 0;
 
@@ -19,27 +20,50 @@ function game_to_css_coords(location) {
     return {x: location.x*w, y:(1-location.y)*h};
 }
 
+function css_to_game_coords(location) {
+    return {x: location.x/w, y:1-location.y*h};
+}
+
+function cartesian_to_polar(location) {
+    // r and theta
+    // theta is respect to up
+    return {r: Math.sqrt(Math.pow(location.x,2)+Math.pow(location.y,2)), t: Math.atan2(location.x, location.y)};
+}
+
+function polar_to_cartesian(location) {
+    // x and y, duh
+    return {x:location.r*Math.sin(location.t),
+	    y:location.r*Math.cos(location.t)};
+}
+
 function move_to_loc(element, location) {
     var tmp_loc = game_to_css_coords(location);
-    element.css("left",tmp_loc.x-ball_radius/2);
-    element.css("top" ,tmp_loc.y-ball_radius/2);
+    var tmp_w = element.width(); // SO DUMB
+    var tmp_h = element.height(); // SO SO DUMB
+    element.css("left",tmp_loc.x-tmp_w/2);
+    element.css("top" ,tmp_loc.y-tmp_h/2);
 }
 
 function start_game() {
     has_ball = true;
 
+    paddle.width = css_to_game_coords({x:$("#main_paddle").width(),y:0}).x;
+
     var game = {};
-    
     game.play = function(){
 	// collision detection
+	// if ball will fall past the paddle...
 	if(ball.loc.y > paddle_height &&
 	   ball.loc.y+ball.vel.y < paddle_height) {
+	    var polar = cartesian_to_polar(ball.vel);
 	    if(ball.loc.x < paddle.loc.x + paddle.width/2 &&
 	       ball.loc.x > paddle.loc.x - paddle.width/2) {
 		// reverse the velocity
-		ball.vel.y = -ball.vel.y
-		// change the direction depending on the paddle side
-		ball.vel.x += ball.loc.x - paddle.loc.x
+		polar.r *= ball_rebound;
+		polar.t += Math.PI;
+		polar.t *= -1;
+		polar.t += (ball.loc.x - paddle.loc.x)/(2*paddle.width);
+		ball.vel = polar_to_cartesian(polar);
 	    }
 	}
 
