@@ -43,7 +43,7 @@ io.sockets.on('connection', function (socket) {
     var player = new Player(nickname, players.length);
     players.push(player);
     // send the player state
-    console.log('send state', player);
+    console.log('send state for PLAYER', player);
     socket.emit('player', player);        
     // send the list of games 
     socket.emit('game_list', games);    

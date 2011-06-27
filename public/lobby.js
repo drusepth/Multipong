@@ -15,6 +15,7 @@ Game.prototype.connect = function(nick) {
   });
   // when the player has been created on the server
   this.socket.on('player', function(player) {
+    console.log('PLAYER INIT OK', player);
     self.player = player;
   });
   // when getting the list of games or when a new game is created
@@ -37,6 +38,9 @@ Game.prototype.connect = function(nick) {
     console.log('Receive init ', players);
     Scoreboard.players = players;
     self.player = Scoreboard.players[self.player.id];
+    $('#nickname_form').hide();
+    $('#games_list').hide();
+    $('#lobby').hide();
     $('#scoreboard').hide();
     $('#main').show();    
     start_game();

@@ -18,7 +18,6 @@ var w = 0;
 var h = 0;
 
 var fps = 30;
-var player = { id: 0, name: "", points: 0 };
 
 // timing stuff
 var date;
@@ -62,14 +61,15 @@ function pass_velocity(velocity, geometry) {
 // push a message to the server
 function send(type, payload) {
     // noop as of now
-    console.log(type+payload);
+    console.log(type, payload);
+    game.socket.emit(type, payload);
 }
 
 // something for the callback
 function callback(obj) {
     if(obj.type == "screen"){
         // send a ball to this screen
-        if(player.id == obj.player) {
+        if(game.player.id == obj.player) {
             ball.vel = pass_velocity(obj.velocity, obj.geometry);
             ball.loc = obj.location;
             if(ball.direction == "left") {
@@ -80,13 +80,13 @@ function callback(obj) {
             }
         }
     } else if(obj.type == "bounce") {
-        if(player.id != obj.player) {
+        if(game.player.id != obj.player) {
             // change arrow location, which is based on the ball.loc
             ball.loc.y = 0.1;
             ball.vel = obj.velocity;
         }
     } else if(obj.type == "drop") {
-        if(player.id != obj.player) {
+        if(game.player.id != obj.player) {
             // display drop message
             $('#gamestate').text('Someone Else Dropped!').toggle(50).delay(3000).toggle(50);
         }
@@ -103,7 +103,7 @@ function start_game() {
     h = $(window).height();
 
     // if we start off,
-    if(init_player == player.id) {
+    if(init_player == game.player.id) {
         ball.loc.x = Math.random()*0.4+0.3;
         ball.loc.y = 1-Math.random()*0.2;
         ball.vel = polar_to_cartesian({r:0.0,t:(Math.random()-0.5)*Math.PI});
@@ -137,8 +137,8 @@ function start_game() {
     // for kicks and giggles
     paddle.width = css_to_game_coords({x:$("#main_paddle").width(),y:0}).x;
 
-    var game = {};
-    game.play = function(){
+    var the_game = {};
+    the_game.play = function(){
         // get the current time
         date = new Date();
         time_start = date.getTime();
@@ -169,7 +169,7 @@ function start_game() {
                 $("#main_paddle").width($("#main_paddle").width()*0.98);
                 // comm
                 send("bounce", {velocity: ball.vel});
-                send("score", {score:player.points});
+                send("score", { game: game.game_id, id: game.player.id, score: game.player.score});
                 bounce();
             }
         }
@@ -199,9 +199,9 @@ function start_game() {
                 $("#main_ball").hide();
                 // send appropriate messages
                 if( ball.loc.x < 0 ) {
-                    send("screen", {direction:"left", geometry:{w:w, h:h}, location:ball.loc, velocity:ball.vel});
+                    send("screen", { game: game.game_id, direction:"left", geometry:{w:w, h:h}, location:ball.loc, velocity:ball.vel});
                 } else { // must be loc.x > 1.0
-                    send("screen", {direction:"right", geometry:{w:w, h:h}, location:ball.loc, velocity:ball.vel});
+                    send("screen", { game: game.game_id, direction:"right", geometry:{w:w, h:h}, location:ball.loc, velocity:ball.vel});
                 }
             }
             // check if the ball is below the water line
@@ -210,7 +210,7 @@ function start_game() {
                 $("#main_ball").hide();
                 // send appropriate messages
                 send("drop",{});
-                send("score",{score:player.points});
+                send("score", { game: game.game_id, id: game.player.id, score: game.player.score });
                 $('#gamestate').text('Dropped!').toggle(50).delay(3000).toggle(50);
             }
             // draw the ball
@@ -228,21 +228,21 @@ function start_game() {
         date = new Date();
         // while trying to do 30fps
         var d_time = 1000/fps - (date.getTime()-time_start);
-        setTimeout(game.play, d_time);
+        setTimeout(the_game.play, d_time);
     }
 
     // start it off
-    game.play();
+    the_game.play();
 }
 
 function bounce() {
     var points_per_bounce = 50;
-    $('#main_score').text(player.points += points_per_bounce).effect("shake", {times: 1}, 75);
+    $('#main_score').text( game.player.score += points_per_bounce).effect("shake", {times: 1}, 75);
     $('#watermark').effect("shake", {times: 1}, 150);
 }
 
 $(document).ready(function(){
-    $('#main_player').text(player.name);
+ //   $('#main_player').text( game.player.nick);
 
  //   start_game();
 });
