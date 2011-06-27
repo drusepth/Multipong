@@ -10,7 +10,7 @@ var paddle_height = 0.1;
 var paddle = {loc: {x:0.5, y:paddle_height},
               vel:{x:0, y:0},
               width:0};
-var ball_rebound = 0.9;
+var ball_rebound = 0.95;
 var w = 0;
 var h = 0;
 
@@ -69,7 +69,10 @@ function start_game() {
         }
 
         // move the paddle
-        paddle.loc.x += paddle.vel.x;
+        if(paddle.vel.x != 0) {
+            paddle.loc.x += paddle.vel.x;
+            //// FIRE AN EVENT HERE
+        }
         // don't allow paddle to move too far
         if(paddle.loc.x - paddle.width/2 < 0)
             paddle.loc.x = paddle.width/2;
