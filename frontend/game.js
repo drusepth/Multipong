@@ -15,6 +15,7 @@ var w = 0;
 var h = 0;
 
 var fps = 30;
+var player = { name: "Player 1", points: 0 };
 
 function game_to_css_coords(location) {
     return {x: location.x*w, y:(1-location.y)*h};
@@ -64,6 +65,8 @@ function start_game() {
 		polar.t *= -1;
 		polar.t += (ball.loc.x - paddle.loc.x)/(2*paddle.width);
 		ball.vel = polar_to_cartesian(polar);
+		
+		bounce();
 	    }
 	}
 
@@ -90,7 +93,14 @@ function start_game() {
     setTimeout(game.play,1000/fps);
 }
 
+function bounce() {
+    var points_per_bounce = 50;
+    $('#main_score').text(player.points += points_per_bounce);
+}
+
 $(document).ready(function(){
+    $('#main_player').text(player.name);
+
     w = $(window).width();
     h = $(window).height();
     // ball_radius = ;
