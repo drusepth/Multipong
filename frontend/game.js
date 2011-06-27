@@ -3,8 +3,10 @@
 // might have to use pixels for x, and 1.0 for y
 
 var has_ball = false;
-var ball = {loc: {x:0.5, y:0}, vel:{x:0, y:0.04}};
+var ball = {loc: {x:0.5, y:0}, vel:{x:0, y:0.06}};
+// var balls = [];
 var ball_radius = 20; // different sized screens?
+var gravity = 0.002;
 var paddle_speed = 0.010;
 var paddle_height = 0.1;
 var paddle = {loc: {x:0.5, y:paddle_height},
@@ -69,17 +71,22 @@ function start_game() {
     $(document).keydown(function(event){
         if(event.which == 39) {
             paddle.vel.x = paddle_speed;
-        }
-        if(event.which == 37) {
+        } else if(event.which == 37) {
             paddle.vel.x = -paddle_speed;
-        }
-        if(event.which == 80) { // p
+        } else if(event.which == 80) { // p
             // Pause the game (bypass our screen)
             $('#gamestate').text('Paused').toggle(50);
+        } else if(event.which == 32) {
+            // charge, special move, maybe implement
+            // charge = true;
+        } else {
+            console.log("Key pressed: "+event.which);
         }
     });
     $(document).keyup(function(event){
-        paddle.vel.x = 0;
+        if(event.which == 39 || event.which == 37)
+            paddle.vel.x = 0;
+        // else if(event.which == 32)
     });
 
     paddle.width = css_to_game_coords({x:$("#main_paddle").width(),y:0}).x;
@@ -136,7 +143,7 @@ function start_game() {
             // move the ball
             ball.loc.x += ball.vel.x;
             ball.loc.y += ball.vel.y;
-            ball.vel.y -= 0.001;
+            ball.vel.y -= gravity;
             // check if the ball moves out of the area
             if(ball.loc.x < 0 || ball.loc.x > 1) {
                 has_ball = false;

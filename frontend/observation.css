@@ -5,6 +5,8 @@
     position: relative;
     top: 20px;
     margin: 0 auto;
+    
+    display: none;
 }
 
 .screen {
