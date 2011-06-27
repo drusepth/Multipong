@@ -73,12 +73,17 @@ $(document).ready(function(){
     start_game();
 
     $(document).keydown(function(event){
-	if(event.which == 39) {
-	    paddle.vel.x = paddle_speed;
-	}
-	if(event.which == 37)
-	    paddle.vel.x = -paddle_speed;
-    });
+	  if(event.which == 39) {
+	      paddle.vel.x = paddle_speed;
+	  }
+	  if(event.which == 37) {
+	      paddle.vel.x = -paddle_speed;
+	  }
+    if(event.which == 80) { // p
+        // Pause the game (bypass our screen)
+        $('#gamestate').text('Paused').toggle(50);
+    }
+});
 
     $(document).keyup(function(event){
 	paddle.vel.x = 0;
