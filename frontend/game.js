@@ -5,7 +5,7 @@
 var has_ball = false;
 var ball = {loc: {x:0.5, y:0}, vel:{x:0, y:0.04}};
 var ball_radius = 20; // different sized screens?
-var paddle_speed = 0.03;
+var paddle_speed = 0.02;
 var paddle_height = 0.1;
 var paddle = {loc: {x:0.5, y:paddle_height},
 	      vel:{x:0, y:0},
@@ -69,6 +69,11 @@ function start_game() {
 
 	// move the paddle
 	paddle.loc.x += paddle.vel.x;
+	// don't allow paddle to move too far
+	if(paddle.loc.x - paddle.width/2 < 0)
+	    paddle.loc.x = paddle.width/2;
+	if(paddle.loc.x + paddle.width/2 > 1)
+	    paddle.loc.x = 1-paddle.width/2;
 
 	// do stuff with the ball
 	if(has_ball) {
