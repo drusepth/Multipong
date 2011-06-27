@@ -11,23 +11,29 @@
         this.player = null;
         this.game_id = null;
       };      
-      Game.prototype.connect = function() {
+      Game.prototype.connect = function(nick) {
+        var nickname = nick;
         var self = this;
         this.socket = io.connect('http://localhost:8080/');
         // when connecting to the server
         this.socket.on('connect', function() {
-          console.log('Connected, emit nick '+document.getElementById('nick').value);
-          self.socket.emit('nick', document.getElementById('nick').value);
+          console.log('Connected, emit nick '+nickname);
+          self.socket.emit('nick', nickname);
+        });
+        // when the player has been created on the server
+        this.socket.on('player', function(player) {
+          self.player = player;
         });
         // when getting the list of games or when a new game is created
-        this.socket.on('game_list', function(list) {
+        this.socket.on('game_list', function( list) {
           GameList.games = list;
+          console.log('game_list', list, GameList.games);
           GameList.render();
         });
         // when a new player joins the current game
         this.socket.on('new_player', function(player) {
-          Scoreboard.players[player.id] = player;
-          Scoreboard.render();
+          WaitView.players[player.id] = player;
+          WaitView.render();
         });       
         // when the game starts        
         this.socket.on('game_start', function (players, id) { 
@@ -38,7 +44,7 @@
         });
         // when the score changes for a user
         this.socket.on('score', function (player) {
-          console.log('Score ', msg);
+          console.log('Score ', player);
           Scoreboard.players[player.id].score = player.score; 
           Scoreboard.render();
         });        
@@ -61,7 +67,7 @@
       };
 
       Game.prototype.decrement_score = function () {
-        this.socket.emit('score', { id: this.player.id });        
+        this.socket.emit('score', { game: this.game_id, id: this.player.id });        
       };
       var game = new Game();
       
@@ -83,12 +89,15 @@
 
       GameList.render = function() {
         var str = '';
+        if(GameList.games.length == 0) {
+          str = '<div>No games created</div>';
+        }
         for(var i = 0; i < GameList.games.length; i++) {
           var game = GameList.games[i];
-          str += '<div><a href="javascript:game.join('+game.id+');" '+game.title+'('+game.id+')</a></div>';                  
+          str += '<div><a href="javascript:game.join('+game.id+');"> '+game.title+'('+game.id+')</a></div>';     
         }
         document.getElementById('gamelist').innerHTML = str;        
-      }
+      };
       
       var WaitView = function() {};
       WaitView.players = [];
@@ -99,7 +108,7 @@
           var player = WaitView.players[i];
           str += '<div>'+player.nick+'('+player.id+')</div>';                  
         }
-        document.getElementById('gamelist').innerHTML = str;                
+        document.getElementById('wait').innerHTML = str;                
       };
     </script>    
   </head>
@@ -108,11 +117,16 @@
     <ul>
      <li>Nickname: </li>
      <li><input id="nick" type="text" value="tester"></li>
-     <li><input type="button" value="Join game" onclick="game.connect();"></li>
+     <li><input type="button" value="Join game" onclick="game.connect(document.getElementById('nick').value);"></li>
     </ul>
     <hr>
     <h1>Choose a game</h1>
-      <div id="gamepick"></div>
+      <div id="gamelist"> </div>
+      <ul>
+       <li>Create a new game: </li>
+       <li><input id="title" type="text" value="My Game"></li>
+       <li><input type="button" value="Create game" onclick="game.create(document.getElementById('title').value);"></li>
+      </ul>       
     <hr>
     <h1>Waiting to start game</h1>
       <div id="wait"></div>

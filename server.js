@@ -21,8 +21,10 @@ io.set('log level', 0);
 
 console.log('Server listening');
 
-var Game = require('./lib/game.js');
+var Game = require('./lib/game.js').Game;
+var Player = require('./lib/game.js').Player;
 var games = [];
+var players = [];
 
 io.sockets.on('connection', function (socket) {
   console.log('Connection');
@@ -30,38 +32,44 @@ io.sockets.on('connection', function (socket) {
   // when connecting to the server
   socket.on('nick', function(nickname) {
     console.log('Receive nick ', nickname);
-    var player = games[0].player();
-    player.nick = nickname;
+    var player = new Player(nickname, players.length);
+    players.push(player);
     // send the player state
-    console.log('send state', games[0].players, player.id);
-    socket.emit('init', games[0].players, player.id);    
+    console.log('send state', player);
+    socket.emit('player', player);        
     // send the list of games 
-    
-    
+    socket.emit('game_list', games);    
   });
   // when a new game is created
   socket.on('create', function(msg) {
-    games.push(new Game(msg.title));
+    console.log('create new game', msg, games);
+    games.push(new Game(msg.title, games.length));
     socket.join('/game/'+games.length);
+    console.log('broadcast games', games);
     socket.broadcast.emit('game_list', games);
+    socket.emit('game_list', games);     
   });
   
   // when a player joins a game
   socket.on('join', function(msg) {
-    socket.broadcast.to('/game/'+msg.game).emit('new_player', games[msg.game].player(msg.id));    
+    console.log('Join '+msg.game, players[msg.id]);
+    socket.join('/game/'+msg.game);
+    socket.broadcast.to('/game/'+msg.game).emit('new_player', players[msg.id]);    
+    socket.emit('new_player', players[msg.id]); 
   });
   
   // when the game is started
   socket.on('start', function(msg) {
     socket.broadcast.to('/game/'+msg.game).emit('game_start');
+    socket.emit('game_start'); 
   });
   
   // respond to score change
   socket.on('score', function(msg) {
-    var player = games[0].player(msg.id);
+    var player = players[msg.id];
     player.score--;
     console.log('Emitting score', msg, player);
-    socket.broadcast.emit('score', { id: player.id, score: player.score });
+    socket.broadcast.to('/game/'+msg.game).emit('score', { id: player.id, score: player.score });
     socket.emit('score', { id: player.id, score: player.score }); 
   });
   
