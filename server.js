@@ -54,8 +54,15 @@ io.sockets.on('connection', function (socket) {
   socket.on('join', function(msg) {
     console.log('Join '+msg.game, players[msg.id]);
     socket.join('/game/'+msg.game);
-    socket.broadcast.to('/game/'+msg.game).emit('new_player', players[msg.id]);    
+    socket.broadcast.to('/game/'+msg.game).emit('new_player', players[msg.id]);  
+    // add the player to the game
+    games[msg.game].add(players[msg.id]);
     socket.emit('new_player', players[msg.id]); 
+  });
+  
+  // when a game is configured 
+  socket.on('configure', function(msg) {
+    games[msg.game].move(msg.player, msg.order);
   });
   
   // when the game is started
