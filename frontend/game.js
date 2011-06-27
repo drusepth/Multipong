@@ -116,6 +116,7 @@ function start_game() {
                 // comm
                 send("bounce", {velocity: ball.vel});
                 send("score", {score:player.points});
+                bounce();
             }
         }
 
@@ -154,6 +155,8 @@ function start_game() {
                 // send appropriate messages
                 send("drop",{});
                 send("score",{score:player.points});
+                // alert("YOU LOSE HAHAHA");
+                $('#gamestate').text('Dropped!').toggle(50).delay(3000).toggle(50);
             }
             // draw the ball
             move_to_loc($("#main_ball"), ball.loc);
