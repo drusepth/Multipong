@@ -23,11 +23,11 @@ console.log('Server listening');
 
 var Game = require('./lib/game.js');
 var games = [];
-games[0] = new Game();
 
 io.sockets.on('connection', function (socket) {
   console.log('Connection');
   
+  // when connecting to the server
   socket.on('nick', function(nickname) {
     console.log('Receive nick ', nickname);
     var player = games[0].player();
@@ -35,16 +35,34 @@ io.sockets.on('connection', function (socket) {
     // send the player state
     console.log('send state', games[0].players, player.id);
     socket.emit('init', games[0].players, player.id);    
-    socket.broadcast.emit('new_player', player);
+    // send the list of games 
+    
+    
+  });
+  // when a new game is created
+  socket.on('create', function(msg) {
+    games.push(new Game(msg.title));
+    socket.join('/game/'+games.length);
+    socket.broadcast.emit('game_list', games);
+  });
+  
+  // when a player joins a game
+  socket.on('join', function(msg) {
+    socket.broadcast.to('/game/'+msg.game).emit('new_player', games[msg.game].player(msg.id));    
+  });
+  
+  // when the game is started
+  socket.on('start', function(msg) {
+    socket.broadcast.to('/game/'+msg.game).emit('game_start');
   });
   
   // respond to score change
   socket.on('score', function(msg) {
-    var player = games[0].player(msg.user);
+    var player = games[0].player(msg.id);
     player.score--;
     console.log('Emitting score', msg, player);
-    socket.broadcast.emit('score', { user: player.id, score: player.score });
-    socket.emit('score', { user: player.id, score: player.score }); 
+    socket.broadcast.emit('score', { id: player.id, score: player.score });
+    socket.emit('score', { id: player.id, score: player.score }); 
   });
   
   socket.on('disconnect', function() {
