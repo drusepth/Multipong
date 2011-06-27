@@ -48,6 +48,19 @@
           Scoreboard.players[player.id].score = player.score; 
           Scoreboard.render();
         });        
+        
+        this.socket.on('screen', function(msg) {
+          if(msg.player == self.player.id) {
+            // trigger screen
+          }
+        });
+        
+        this.socket.on('bounce', function(msg) {
+          // trigger bounce
+        });
+        this.socket.on('drop', function(msg) {
+          
+        });
       };
       
       // Create a game for other people to join

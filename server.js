@@ -71,13 +71,34 @@ io.sockets.on('connection', function (socket) {
     socket.emit('game_start'); 
   });
   
+  // when the ball leaves the screen
+  socket.on('screen', function(msg) {
+    // tranlate player to the correct player
+    if(msg.direction == 'left') {
+      msg.player = games[msg.game].leftOf(msg.player);   
+    } else {
+      msg.player = games[msg.game].rightOf(msg.player);   
+    }    
+    socket.broadcast.to('/game/'+msg.game).emit('screen', msg);
+  });
+  
+  // when the ball bounces
+  socket.on('bounce', function(msg) {
+    socket.broadcast.to('/game/'+msg.game).emit('bounce', msg);
+  });
+  
+  // when the ball drops
+  socket.on('drop', function(msg) {
+    socket.broadcast.to('/game/'+msg.game).emit('drop', msg);
+  });
+  
   // respond to score change
   socket.on('score', function(msg) {
     var player = players[msg.id];
     player.score--;
     console.log('Emitting score', msg, player);
     socket.broadcast.to('/game/'+msg.game).emit('score', { id: player.id, score: player.score });
-    socket.emit('score', { id: player.id, score: player.score }); 
+    socket.emit('score', { id: player.id, score: msg.score }); 
   });
   
   socket.on('disconnect', function() {
