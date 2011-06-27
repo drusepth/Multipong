@@ -1,0 +1,104 @@
+* {
+    margin: 0px;
+    padding: 0px;
+    font-family: Georgia;
+}
+
+a {
+    color: #000000;
+    text-decoration: none;
+}
+
+body {
+    background: #222222;
+}
+
+ul {
+    list-style: none;
+}
+
+.centered_popup {
+    height: 200px;
+    width: 400px;
+    position: absolute;
+    top: 100px;
+    left: 50%;
+    margin-left: -200px;
+    
+    background: #eeeeee;
+    border: 3px solid #cccccc;
+    text-align: center;
+    
+    overflow: auto;
+}
+
+h1 {
+    font-size: 30px;
+    margin: 10px;
+}
+
+h2 {
+    background: #dddddd;
+    border-bottom: 1px solid #cccccc;
+}
+
+p {
+    color: #444444;
+    margin-bottom: 20px;
+}
+
+input {
+    margin: 10px;
+    padding: 10px;
+    font-size: 20px;
+}
+
+#nickname_form {
+    display: none;
+}
+
+.faded {
+    color: #999999;
+}
+
+ul {
+    text-align: left;
+    margin: 10px;
+}
+
+ul li a {
+    display: block;
+}
+
+ul li span {
+    float: right;
+}
+
+ul li:hover {
+    background: #cccccc;
+}
+
+.players {
+    float: left;
+    width: 100px;
+    height: 130px;
+    padding: 10px;
+    overflow: auto;
+}
+
+.highlight {
+    border-bottom: 1px solid #333333;
+    margin-bottom: 5px;
+}
+
+#nickname_form {
+    display: none;
+}
+
+#games_list {
+    display: none;
+}
+
+#lobby { 
+    display: none;
+}

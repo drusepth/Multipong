@@ -111,33 +111,49 @@
         document.getElementById('wait').innerHTML = str;                
       };
     </script>    
-  </head>
-  <body>
-    <h1>Pick a nickname</h1>
-    <ul>
-     <li>Nickname: </li>
-     <li><input id="nick" type="text" value="tester"></li>
-     <li><input type="button" value="Join game" onclick="game.connect(document.getElementById('nick').value);"></li>
-    </ul>
-    <hr>
-    <h1>Choose a game</h1>
-      <div id="gamelist"> </div>
-      <ul>
-       <li>Create a new game: </li>
-       <li><input id="title" type="text" value="My Game"></li>
-       <li><input type="button" value="Create game" onclick="game.create(document.getElementById('title').value);"></li>
-      </ul>       
-    <hr>
-    <h1>Waiting to start game</h1>
-      <div id="wait"></div>
-      <input type="button" value="Start game" onclick="game.start();">
-    <hr>
-    <h1>In-game</h1>
-    <h2>Scoreboard</h2>
-    <div id="scores">Score: </div>
-    
+    <script src="jquery-1.6.1.min.js"></script>
+    <script src="jquery-ui-1.8.13.custom.min.js"></script>
+    <script src="lobby.js"></script>
+    <script src="pages.js"></script>
+    <link rel="stylesheet" type="text/css" href="pages.css" />
+</head>
+<body>
 
-    <input type="button" value="lose point" onclick="game.decrement_score();">
-    
-  </body>
+<form id="nickname_form" class="centered_popup">
+    <h1>Multipong</h1>
+    <p>
+        Please enter a nickname to join games.
+    </p>
+    <input type="text" id="nickname" placeholder="John Doe" />
+    <input type="submit" id="go" value="Go!" />
+    <p class="faded">
+        <span id="game_count">2</span> games being played right now.
+    </p>
+</form>
+
+<div id="games_list" class="centered_popup">
+    <h2>Open Games</h2>
+    <ul>
+        <li class="game" id="game_1"><span class="faded">4 people in lobby</span><a href="#">Player 1's game</a></li>
+        <li class="game" id="game_2"><span class="faded">2 people in lobby</span><a href="#">John Doe's game</a></li>
+    </ul>
+    <p>
+        Or, <a href="javascript:game.create(document.getElementById('nickname').value);">create a new game</a>
+    </p>
+</div>
+
+<div id="lobby" class="centered_popup">
+    <h2>Player 1's game</h2>
+    <ul class="players">
+        <li class="highlight">4 players:</li>
+        <li>Alice</li>
+        <li>Bob</li>
+        <li>Carol</li>
+        <li>David</li>
+    </ul>
+    <input type="button" value="Start Game!" style="margin-top: 50px;" id="start_game" />
+    <p>Any player can start this game.</p>
+</div>
+
+</body>
 </html>
