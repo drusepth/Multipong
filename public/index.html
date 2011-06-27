@@ -4,113 +4,7 @@
     <title></title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <script src="/socket.io/socket.io.js"></script>
-    <script>
-      
-      var Game = function() {
-        this.socket = null;
-        this.player = null;
-        this.game_id = null;
-      };      
-      Game.prototype.connect = function(nick) {
-        var nickname = nick;
-        var self = this;
-        this.socket = io.connect('http://localhost:8080/');
-        // when connecting to the server
-        this.socket.on('connect', function() {
-          console.log('Connected, emit nick '+nickname);
-          self.socket.emit('nick', nickname);
-        });
-        // when the player has been created on the server
-        this.socket.on('player', function(player) {
-          self.player = player;
-        });
-        // when getting the list of games or when a new game is created
-        this.socket.on('game_list', function( list) {
-          GameList.games = list;
-          console.log('game_list', list, GameList.games);
-          GameList.render();
-        });
-        // when a new player joins the current game
-        this.socket.on('new_player', function(player) {
-          WaitView.players[player.id] = player;
-          WaitView.render();
-        });       
-        // when the game starts        
-        this.socket.on('game_start', function (players, id) { 
-          console.log('Receive init ', players, id);
-          Scoreboard.players = players;
-          self.player = Scoreboard.players[id];
-          Scoreboard.render();
-        });
-        // when the score changes for a user
-        this.socket.on('score', function (player) {
-          console.log('Score ', player);
-          Scoreboard.players[player.id].score = player.score; 
-          Scoreboard.render();
-        });        
-      };
-      
-      // Create a game for other people to join
-      Game.prototype.create = function(title) {
-        this.socket.emit('create', { title: title});
-      };
-      
-      // Join an existing game
-      Game.prototype.join = function(game_id) {
-        this.game_id = game_id;
-        this.socket.emit('join', { game: this.game_id, id: this.player.id });
-      };
-
-      // Start the existing game
-      Game.prototype.start = function() {
-        this.socket.emit('start', { game: this.game_id });
-      };
-
-      Game.prototype.decrement_score = function () {
-        this.socket.emit('score', { game: this.game_id, id: this.player.id });        
-      };
-      var game = new Game();
-      
-      var Scoreboard = function() {};
-      Scoreboard.players = [];
-      
-      Scoreboard.render = function() {
-        var str = '';
-        for(var i = 0; i < Scoreboard.players.length; i++) {
-          var player = Scoreboard.players[i];
-          str += '<div>'+player.nick+'('+player.id+') Score: '+player.score+'</div>';                  
-        }
-        document.getElementById('scores').innerHTML = str;
-      };
-      
-      var GameList = function () { };
-      
-      GameList.games = [];
-
-      GameList.render = function() {
-        var str = '';
-        if(GameList.games.length == 0) {
-          str = '<div>No games created</div>';
-        }
-        for(var i = 0; i < GameList.games.length; i++) {
-          var game = GameList.games[i];
-          str += '<div><a href="javascript:game.join('+game.id+');"> '+game.title+'('+game.id+')</a></div>';     
-        }
-        document.getElementById('gamelist').innerHTML = str;        
-      };
-      
-      var WaitView = function() {};
-      WaitView.players = [];
-      
-      WaitView.render = function() {
-        var str = '';
-        for(var i = 0; i < WaitView.players.length; i++) {
-          var player = WaitView.players[i];
-          str += '<div>'+player.nick+'('+player.id+')</div>';                  
-        }
-        document.getElementById('wait').innerHTML = str;                
-      };
-    </script>    
+    <script src="lobby.js"></script>
     <script src="jquery-1.6.1.min.js"></script>
     <script src="jquery-ui-1.8.13.custom.min.js"></script>
     <script src="pages.js"></script>
@@ -132,7 +26,7 @@
 
 <div id="games_list" class="centered_popup">
     <h2>Open Games</h2>
-    <ul>
+    <ul id="gamelist">
         <li class="game" id="game_1"><span class="faded">4 people in lobby</span><a href="#">Player 1's game</a></li>
         <li class="game" id="game_2"><span class="faded">2 people in lobby</span><a href="#">John Doe's game</a></li>
     </ul>
@@ -143,7 +37,7 @@
 
 <div id="lobby" class="centered_popup">
     <h2>Player 1's game</h2>
-    <ul class="players">
+    <ul id="players" class="players">
         <li class="highlight">4 players:</li>
         <li>Alice</li>
         <li>Bob</li>

@@ -13,6 +13,11 @@ router.set('/', function(req, res, params, next) {
   });
 });
 router.file('/favicon.ico', './public/favicon.ico');
+router.file('/jquery-1.6.1.min.js', './frontend/jquery-1.6.1.min.js');
+router.file('/lobby.js', './public/lobby.js');
+router.file('/pages.js', './public/pages.js');
+router.file('/pages.css', './public/pages.css');
+router.file('/jquery-ui-1.8.13.custom.min.js', './frontend/jquery-ui-1.8.13.custom.min.js');
 
 var server = http.createServer(function(req, res) {router.route(req, res);} );
 server.listen(8080, 'localhost');
@@ -57,7 +62,10 @@ io.sockets.on('connection', function (socket) {
     socket.broadcast.to('/game/'+msg.game).emit('new_player', players[msg.id]);  
     // add the player to the game
     games[msg.game].add(players[msg.id]);
-    socket.emit('new_player', players[msg.id]); 
+    // sync players
+    for(var i = 0; i < games[msg.game].players.length; i++) {
+      socket.emit('new_player', games[msg.game].players[i]);       
+    }
   });
   
   // when a game is configured 
@@ -71,13 +79,34 @@ io.sockets.on('connection', function (socket) {
     socket.emit('game_start'); 
   });
   
+  // when the ball leaves the screen
+  socket.on('screen', function(msg) {
+    // tranlate player to the correct player
+    if(msg.direction == 'left') {
+      msg.player = games[msg.game].leftOf(msg.player);   
+    } else {
+      msg.player = games[msg.game].rightOf(msg.player);   
+    }    
+    socket.broadcast.to('/game/'+msg.game).emit('screen', msg);
+  });
+  
+  // when the ball bounces
+  socket.on('bounce', function(msg) {
+    socket.broadcast.to('/game/'+msg.game).emit('bounce', msg);
+  });
+  
+  // when the ball drops
+  socket.on('drop', function(msg) {
+    socket.broadcast.to('/game/'+msg.game).emit('drop', msg);
+  });
+  
   // respond to score change
   socket.on('score', function(msg) {
     var player = players[msg.id];
     player.score--;
     console.log('Emitting score', msg, player);
     socket.broadcast.to('/game/'+msg.game).emit('score', { id: player.id, score: player.score });
-    socket.emit('score', { id: player.id, score: player.score }); 
+    socket.emit('score', { id: player.id, score: msg.score }); 
   });
   
   socket.on('disconnect', function() {
