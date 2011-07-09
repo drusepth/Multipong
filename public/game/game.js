@@ -55,7 +55,15 @@ var Game = function() {
   this.player = new Player();  
   this.ball = new Ball();
   this.paddle = new Paddle();
-  this.socket = null;
+  var self = this;
+  this.socket = { emit: function(type, msg) { 
+      if(type == 'start') {
+        self.realStart();
+      } else {
+        self.receive(msg);
+      } 
+    } 
+  };
 };
 
 // constants
@@ -107,6 +115,10 @@ var time_start = 0;
 // MESSAGING
 
 Game.prototype.connect = function(nick) {
+  if(window.io == undefined) {
+    // skip if the server is not running
+    return;
+  }
   var nickname = nick;
   var self = this;
   this.socket = io.connect('http://localhost:8080/');
