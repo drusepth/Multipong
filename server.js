@@ -74,10 +74,14 @@ io.sockets.on('connection', function (socket) {
   });
   
   // when the game is started
-  socket.on('start', function(msg) {
+  socket.on('start', function(msg) {    
     console.log('Game started', msg);
-    socket.broadcast.to('/game/'+msg.game).emit('game_start', games[msg.game].players);
-    socket.emit('game_start', games[msg.game].players); 
+    var out = { 
+      starting_player_id: games[msg.game].players[0].id, 
+      players: games[msg.game].players
+    };
+    socket.broadcast.to('/game/'+msg.game).emit('game_start', out);
+    socket.emit('game_start', out); 
   });
   
   // when the ball leaves the screen
@@ -90,18 +94,21 @@ io.sockets.on('connection', function (socket) {
     }    
     console.log('Emitting screen', msg);
     socket.broadcast.emit('screen', msg);
+    socket.emit('screen', msg);
   });
   
   // when the ball bounces
   socket.on('bounce', function(msg) {
     console.log('Emitting bounce', msg);
     socket.broadcast.emit('bounce', msg);
+    socket.emit('bounce', msg); 
   });
   
   // when the ball drops
   socket.on('drop', function(msg) {
     console.log('Emitting drop', msg);
     socket.broadcast.emit('drop', msg);
+    socket.emit('drop', msg); 
   });
   
   // respond to score change

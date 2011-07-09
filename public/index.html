@@ -9,9 +9,9 @@
     <script src="/lib/jquery-ui-1.8.13.custom.min.js"></script>
     <!-- Views -->
     <script src="/views/gamelist.js"></script>
-    <script src="/views/pages.js"></script>
-    <!-- Client and game engine -->
-    <script src="game/client.js"></script>
+    <script src="/views/wait.js"></script>
+    <script src="/views/scoreboard.js"></script>
+    <!-- Game engine -->
     <script src="game/game.js"></script>
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="/css/pages.css" />
@@ -20,9 +20,31 @@
     
     
     <script type="text/javascript">
+      // initialize the game
+      var g = new Game();
       $(document).ready(function () {
- //         $('#nickname_form').hide();
- //         $('#main').show();
+
+        $('#nickname_form').show();
+
+        $('#nickname_form').submit(function () {
+            $('#nickname_form').hide();
+            $('#games_list').show();
+            g.connect($('#nickname').val());
+            return false;
+        });
+
+        $('#games_list').find('li').click(function () {
+            $('#games_list').hide();
+            $('#lobby').show();
+        });
+
+        $('#lobby').find('#start_game').click(function () {
+            $('#lobby').hide();
+//            $('#scoreboard').show();
+            $('#scoreboard').hide();
+            $('#main').show();
+            g.start();
+        });
       });
     </script>
 </head>
@@ -47,7 +69,7 @@
         <li class="game" id="game_2"><span class="faded">2 people in lobby</span><a href="#">John Doe's game</a></li>
     </ul>
     <p>
-        Or, <a href="javascript:game.create(document.getElementById('nickname').value);">create a new game</a>
+        Or, <a href="javascript:g.create(document.getElementById('nickname').value);">create a new game</a>
     </p>
 </div>
 

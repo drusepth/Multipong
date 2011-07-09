@@ -9,7 +9,7 @@ GameList.render = function() {
   }
   for(var i = 0; i < GameList.games.length; i++) {
     var game = GameList.games[i];
-    str += '<div><a href="javascript:game.join('+game.id+');"> '+game.title+'</a></div>';
+    str += '<div><a href="javascript:g.join('+game.id+');"> '+game.title+'</a></div>';
   }
   document.getElementById('gamelist').innerHTML = str;
 };

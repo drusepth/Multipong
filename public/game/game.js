@@ -55,6 +55,7 @@ var Game = function() {
   this.player = new Player();  
   this.ball = new Ball();
   this.paddle = new Paddle();
+  this.socket = null;
 };
 
 // constants
@@ -103,12 +104,105 @@ Game.prototype.pass_velocity = function(velocity, geometry) {
 var date;
 var time_start = 0;
 
+// MESSAGING
+
+Game.prototype.connect = function(nick) {
+  var nickname = nick;
+  var self = this;
+  this.socket = io.connect('http://localhost:8080/');
+  // when connecting to the server
+  this.socket.on('connect', function() {
+    console.log('Connected, emit nick '+nickname);
+    self.socket.emit('nick', nickname);
+  });
+  // when the player has been created on the server
+  this.socket.on('player', function(player) {
+    console.log('PLAYER INIT OK', player);
+    self.player.id = player.id;
+  });
+  // when getting the list of games or when a new game is created
+  this.socket.on('game_list', function( list) {
+    GameList.games = list;
+    console.log('game_list', list, GameList.games);
+    GameList.render();
+  });
+  // when a new player joins the current game
+  this.socket.on('new_player', function(player) {
+    WaitView.players[player.id] = player;
+    WaitView.render();
+  });       
+  // when a game is created
+  this.socket.on('created', function(game_id) {
+    this.game_id = game_id;  
+  });
+  // when the game starts        
+  this.socket.on('game_start', function (msg) { 
+    console.log('Receive init ', msg);
+    Scoreboard.players = msg.players;
+    self.init_player = msg.starting_player_id;
+    console.log('Starting player '+self.init_player+' current player '+self.player.id);
+    $('#nickname_form').hide();
+    $('#games_list').hide();
+    $('#lobby').hide();
+    $('#scoreboard').hide();
+    $('#main').show();    
+    self.realStart();
+//    Scoreboard.render();
+  });
+  // when the score changes for a user
+  this.socket.on('score', function (player) {
+    console.log('Score ', player);
+    Scoreboard.players[player.id].score = player.score; 
+    Scoreboard.render();
+  });        
+
+  this.socket.on('screen', function(msg) {
+    // trigger screen
+    msg.type = 'screen';
+    self.receive(msg);
+  });
+
+  this.socket.on('bounce', function(msg) {
+    // trigger bounce
+    msg.type = 'bounce';
+    self.receive(msg);
+  });
+  this.socket.on('drop', function(msg) {
+    // trigger drop
+    msg.type = 'drop';
+    self.receive(msg);
+  });
+};
+
+// Create a game for other people to join
+Game.prototype.create = function(title, game_id) {
+  this.socket.emit('create', { title: title});
+};
+
+// Join an existing game
+Game.prototype.join = function(game_id) {
+  this.game_id = game_id;
+  this.socket.emit('join', { game: this.game_id, id: this.player.id });
+  $('#games_list').hide();
+  $('#lobby').show();  
+};
+
+// Start the existing game
+Game.prototype.start = function() {
+  this.socket.emit('start', { game: this.game_id });
+};
+
+Game.prototype.decrement_score = function () {
+  this.socket.emit('score', { game: this.game_id, id: this.player.id });        
+};
+
 // push a message to the server
-function send(type, payload) {
+Game.prototype.send = function(type, payload) {
     // noop as of now
-    console.log('SEND', type, payload);
-    // game.socket.emit(type, payload);
-}
+    console.log('SEND', type, JSON.stringify(payload, 3));
+    payload.type = type;
+    this.socket.emit(type, payload);  
+};
 
 // something for the callback
 Game.prototype.receive = function(obj) {
@@ -125,6 +219,8 @@ Game.prototype.receive = function(obj) {
             if(obj.direction == "right") {
                 this.ball.loc.x -= 1
             }
+            this.has_ball = true;
+            $("#main_ball").show();
         }
     } else if(obj.type == "bounce") {
         if(this.player.id != obj.id) {
@@ -147,18 +243,18 @@ Game.prototype.receive = function(obj) {
 
 // ------------------------------------------------------------
 
-Game.prototype.start = function(init_player){
-  // default values
-  init_player || (init_player = 0);
+Game.prototype.realStart = function(){
   // vital stuff
   this.w = $(window).width();
   this.h = $(window).height();
   // if we start off,
-  if(init_player == this.init_player) {
+  if(this.player.id == this.init_player) {
     this.ball.loc.x = Math.random()*0.4+0.3;
     this.ball.loc.y = 1-Math.random()*0.2;
     this.ball.vel = this.polar_to_cartesian({r:0.0,t:(Math.random()-0.5)*Math.PI});
     this.has_ball = true;
+  } else {
+    $('#main_ball').hide();
   }
   this.registerKeyboard();
   // for kicks and giggles
@@ -194,48 +290,68 @@ Game.prototype.registerKeyboard = function() {
     });  
 };
 
-Game.prototype.hasCollision = function(ball, paddle) {
+Game.prototype.canHitPaddle = function(ball, paddle) {
   return (ball.loc.y > paddle.height && ball.loc.y+ball.vel.y < paddle.height);
 };
 
-Game.prototype.handleCollision = function(ball, paddle) {
-    // check if it falls into the paddle
-    if(ball.loc.x < paddle.loc.x + paddle.width/2 &&
-      ball.loc.x > paddle.loc.x - paddle.width/2) {
-      // it's a bounce!
-      // convert to polar coordinates
-      var polar = this.cartesian_to_polar(ball.vel);
-      // slow it down
-      polar.r *= Game.ball_rebound;
-      // turn it around
-      polar.t += Math.PI;
-      polar.t *= -1;
-      // change the velocity depending on where it lands
-      polar.t += (ball.loc.x - paddle.loc.x)/(4*paddle.width);
-      // change back
-      ball.vel = this.polar_to_cartesian(polar);
-      // add the paddle's velocity to the ball
-      ball.vel.x += paddle.vel.x*0.5;
-      
-      // size down the paddle after a hit
-      paddle.width *= 0.98;
-      $("#main_paddle").width($("#main_paddle").width()*0.98);
-      // comm
-      send("bounce", {
-        game: this.game_id, 
-        id: this.player.id, 
-        velocity: ball.vel
-        });
-      send("score", {
-        game: this.game_id, 
-        id: this.player.id, 
-        score: this.player.score
-        });
-      var points_per_bounce = 50;
-      $('#main_score').text( this.player.score += points_per_bounce).effect("shake", {times: 1}, 75);
-      $('#watermark').effect("shake", {times: 1}, 150);
-    }
+Game.prototype.isPaddleHit = function(ball, paddle) {
+  return (ball.loc.x < paddle.loc.x + paddle.width/2 &&
+      ball.loc.x > paddle.loc.x - paddle.width/2);  
+};
+
+Game.prototype.bounceBall = function(ball, paddle) {
+  // it's a bounce!
+  // convert to polar coordinates
+  var polar = this.cartesian_to_polar(ball.vel);
+  // slow it down
+  polar.r *= Game.ball_rebound;
+  // turn it around
+  polar.t += Math.PI;
+  polar.t *= -1;
+  // change the velocity depending on where it lands
+  polar.t += (ball.loc.x - paddle.loc.x)/(4*paddle.width);
+  // change back
+  ball.vel = this.polar_to_cartesian(polar);
+  // add the paddle's velocity to the ball
+  ball.vel.x += paddle.vel.x*0.5;
   
+  if(ball.vel.y < 0) {
+    ball.vel.y = 0.1;
+  }
+
+  // size down the paddle after a hit
+  paddle.width *= 0.98;
+  $("#main_paddle").width($("#main_paddle").width()*0.98);
+  // comm
+  this.send("bounce", {
+    game: this.game_id, 
+    id: this.player.id, 
+    velocity: ball.vel
+    });
+  this.send("score", {
+    game: this.game_id, 
+    id: this.player.id, 
+    score: this.player.score
+    });
+  var points_per_bounce = 50;
+  $('#main_score').text( this.player.score += points_per_bounce).effect("shake", {times: 1}, 75);
+  $('#watermark').effect("shake", {times: 1}, 150);
+};
+
+Game.prototype.dropBall = function() {
+  this.has_ball = false;
+  $("#main_ball").hide();
+  // send appropriate messages
+  this.send("drop",{
+    game: this.game_id, 
+    id: this.player.id
+  });
+  this.send("score", {
+    game: this.game_id, 
+    id: this.player.id, 
+    score: this.player.score
+    });
+  $('#gamestate').text('Dropped!').toggle(50).delay(3000).toggle(50);    
 };
 
 Game.prototype.tick = function() {
@@ -244,8 +360,11 @@ Game.prototype.tick = function() {
   time_start = date.getTime();
   // collision detection
   // if ball will fall past the paddle...
-  if(this.hasCollision(this.ball, this.paddle) && this.has_ball) {
-    this.handleCollision(this.ball, this.paddle);
+  if(this.has_ball && this.canHitPaddle(this.ball, this.paddle)) {
+    // check if it falls into the paddle
+    if(this.isPaddleHit(this.ball, this.paddle)) {
+      this.bounceBall(this.ball, this.paddle);
+    }    
   }
 
   // move the paddle
@@ -255,13 +374,14 @@ Game.prototype.tick = function() {
   if(this.has_ball) {
     // move the ball
     this.ball.move();
+//    console.log(this.ball.loc.x, this.ball.loc.y, this.ball.vel.x, this.ball.vel.y);
     // check if the ball moves out of the area
     if(this.ball.loc.x < 0 || this.ball.loc.x > 1) {
       this.has_ball = false;
       $("#main_ball").hide();
       // send appropriate messages
       if( this.ball.loc.x < 0 ) {
-        send("screen", {
+        this.send("screen", {
           game: this.game_id, 
           id: this.player.id, 
           direction:"left", 
@@ -273,7 +393,7 @@ Game.prototype.tick = function() {
           velocity: this.ball.vel
           });
       } else { // must be loc.x > 1.0
-        send("screen", {
+        this.send("screen", {
           game: this.game_id, 
           id: this.player.id, 
           direction:"right", 
@@ -288,19 +408,13 @@ Game.prototype.tick = function() {
     }
     // check if the ball is below the water line
     if(this.ball.loc.y < 0) {
-      this.has_ball = false;
-      $("#main_ball").hide();
-      // send appropriate messages
-      send("drop",{
-        game: this.game_id, 
-        id: this.player.id
-      });
-      send("score", {
-        game: this.game_id, 
-        id: this.player.id, 
-        score: this.player.score
-        });
-      $('#gamestate').text('Dropped!').toggle(50).delay(3000).toggle(50);  
+      //this.dropBall();
+      this.bounceBall(this.ball, this.paddle);
+    }
+    // bounce on top
+    if(this.ball.loc.y > 1) {
+      this.ball.loc.y = 1;
+      this.ball.vel.y = 0;
     }
     // draw the ball
     this.move_to_loc($("#main_ball"), this.ball.loc);
@@ -318,6 +432,6 @@ Game.prototype.tick = function() {
   // while trying to do 30fps
   var d_time = 1000/this.fps - (date.getTime()-time_start);
   var self = this;
-  setTimeout( function() { self.tick(); }, d_time);  
+  setTimeout( function() {self.tick();}, d_time);  
 };
 
