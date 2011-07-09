@@ -1,10 +1,10 @@
 
-var Game = function() {
+var GameClient = function() {
   this.socket = null;
   this.player = null;
   this.game_id = null;
 };      
-Game.prototype.connect = function(nick) {
+GameClient.prototype.connect = function(nick) {
   var nickname = nick;
   var self = this;
   this.socket = io.connect('http://localhost:8080/');
@@ -72,12 +72,12 @@ Game.prototype.connect = function(nick) {
 };
 
 // Create a game for other people to join
-Game.prototype.create = function(title, game_id) {
+GameClient.prototype.create = function(title, game_id) {
   this.socket.emit('create', { title: title});
 };
 
 // Join an existing game
-Game.prototype.join = function(game_id) {
+GameClient.prototype.join = function(game_id) {
   this.game_id = game_id;
   this.socket.emit('join', { game: this.game_id, id: this.player.id });
   $('#games_list').hide();
@@ -85,54 +85,12 @@ Game.prototype.join = function(game_id) {
 };
 
 // Start the existing game
-Game.prototype.start = function() {
+GameClient.prototype.start = function() {
   this.socket.emit('start', { game: this.game_id });
 };
 
-Game.prototype.decrement_score = function () {
+GameClient.prototype.decrement_score = function () {
   this.socket.emit('score', { game: this.game_id, id: this.player.id });        
 };
 
-game = new Game();
-
-var Scoreboard = function() {};
-Scoreboard.players = [];
-
-Scoreboard.render = function() {
-    var str = '';
-    for(var i = 0; i < Scoreboard.players.length; i++) {
-        var player = Scoreboard.players[i];
-        str += '<div>'+player.nick+'('+player.id+') Score: '+player.score+'</div>';                  
-    }
-    document.getElementById('scoreboard').innerHTML = str;
-};
-
-var GameList = function () { };
-
-GameList.games = [];
-
-GameList.render = function() {
-  var str = '';
-  if(GameList.games.length == 0) {
-    str = '<div>No games created. ...Yet.</div>';
-  }
-  for(var i = 0; i < GameList.games.length; i++) {
-    var game = GameList.games[i];
-    str += '<div><a href="javascript:game.join('+game.id+');"> '+game.title+'</a></div>';
-  }
-  document.getElementById('gamelist').innerHTML = str;
-};
-
-var WaitView = function() {};
-WaitView.players = [];
-
-WaitView.render = function() {
-  var str = '';
-  for(var i = 0; i < WaitView.players.length; i++) {
-    var player = WaitView.players[i];
-    if(player && player.nick) {
-      str += '<div>'+player.nick+'('+player.id+')</div>';                  
-    }
-  }
-  document.getElementById('players').innerHTML = str;                
-};
+gameClient = new GameClient();

@@ -13,17 +13,12 @@ router.set('/', function(req, res, params, next) {
   });
 });
 router.file('/favicon.ico', './public/favicon.ico');
-router.file('/jquery-1.6.1.min.js', './frontend/jquery-1.6.1.min.js');
-router.file('/lobby.js', './public/lobby.js');
-router.file('/pages.js', './public/pages.js');
-router.file('/pages.css', './public/pages.css');
-router.file('/jquery-ui-1.8.13.custom.min.js', './frontend/jquery-ui-1.8.13.custom.min.js');
-router.file('/game.js', './frontend/game.js');
-router.file('/game.css', './frontend/game.css');
-router.file('/observation.css', './frontend/observation.css');
+
+router.directory(/\/(.*)/, './public/');
 
 var server = http.createServer(function(req, res) {router.route(req, res);} );
 server.listen(8080, 'localhost');
+console.log('Server listening at port 8080');
 var io = sio.listen(server);
 io.set('log level', 0);
 
@@ -114,8 +109,8 @@ io.sockets.on('connection', function (socket) {
     var player = players[msg.id];
     player.score--;
     console.log('Emitting score', msg, player);
-    socket.broadcast.to('/game/'+msg.game).emit('score', { id: player.id, score: player.score });
-    socket.emit('score', { id: player.id, score: msg.score }); 
+    socket.broadcast.to('/game/'+msg.game).emit('score', {id: player.id, score: player.score});
+    socket.emit('score', {id: player.id, score: msg.score}); 
   });
   
   socket.on('disconnect', function() {

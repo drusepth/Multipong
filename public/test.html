@@ -1,11 +1,12 @@
 <!doctype html>
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" href="game.css" />
-    <link rel="stylesheet" type="text/css" href="observation.css" />
-    <script src="jquery-1.6.1.min.js"></script>
-    <script src="jquery-ui-1.8.13.custom.min.js"></script>
-    <script src="game.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/game.css" />
+    <link rel="stylesheet" type="text/css" href="/css/observation.css" />
+    <!-- Libraries -->
+    <script src="/lib/jquery-1.6.1.min.js"></script>
+    <script src="/lib/jquery-ui-1.8.13.custom.min.js"></script>
+    <script src="/game/game.js"></script>
 </head>
 <body>
 
@@ -33,5 +34,24 @@
     <div id="watermark">Multipong</div>
 
     <div id="gamestate"></div>
+    <script type="text/javascript">
+      var g = new Game();
+      g.start();
+      
+      function test1() {
+        var obj = { 
+          type: 'screen',
+          id: 0,
+          game: 0,
+          direction: 'left', 
+          geometry: { h: 540, w: 1438 },
+          location: { x: -0.004375512435696338, y: 5.869679359819477},
+          velocity: { x: -0.009132117070291674, y: 0.0016821212718172215 }
+        };
+        g.receive(obj);
+      };
+      
+      
+    </script>
 </body>
 </html>

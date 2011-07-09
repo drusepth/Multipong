@@ -3,15 +3,22 @@
   <head>
     <title></title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Libraries -->
     <script src="/socket.io/socket.io.js"></script>
-    <script src="lobby.js"></script>
-    <script src="jquery-1.6.1.min.js"></script>
-    <script src="jquery-ui-1.8.13.custom.min.js"></script>
-    <script src="pages.js"></script>
-    <link rel="stylesheet" type="text/css" href="pages.css" />
-    <script src="game.js"></script>
-    <link rel="stylesheet" type="text/css" href="game.css" />
-    <link rel="stylesheet" type="text/css" href="observation.css" />
+    <script src="/lib/jquery-1.6.1.min.js"></script>
+    <script src="/lib/jquery-ui-1.8.13.custom.min.js"></script>
+    <!-- Views -->
+    <script src="/views/gamelist.js"></script>
+    <script src="/views/pages.js"></script>
+    <!-- Client and game engine -->
+    <script src="game/client.js"></script>
+    <script src="game/game.js"></script>
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="/css/pages.css" />
+    <link rel="stylesheet" type="text/css" href="/css/game.css" />
+    <link rel="stylesheet" type="text/css" href="/css/observation.css" />
+    
+    
     <script type="text/javascript">
       $(document).ready(function () {
  //         $('#nickname_form').hide();
